@@ -151,3 +151,24 @@ python3 .github/scripts/ai_review.py --repo owner/repo --pr 123 --dry-run
 
 `--dry-run` prints the rendered review body and the inline comments to stdout
 and posts nothing, which is the fastest way to iterate on the prompt.
+
+## Diff statistics
+
+Large diffs are truncated before they reach the model, which makes a review
+silently partial. [`diffstat.py`](../.github/scripts/diffstat.py) parses the
+unified diff into per-file added/removed counts so the prompt can state how big
+the change was and which files dominate it, rather than letting the model assume
+it saw everything.
+
+```python
+from diffstat import format_diffstat, parse_diffstat
+
+print(format_diffstat(parse_diffstat(diff)))
+# - `src/app.py` +2/-1
+# - `README.md` +1/-1
+```
+
+Counts follow `git diff --numstat`: `+++`/`---` headers are file markers rather
+than content, and `\ No newline at end of file` is metadata. Unparseable input
+returns no statistics instead of raising — a missing statistic is a better
+outcome than a failed review.
