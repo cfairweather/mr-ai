@@ -1,0 +1,64 @@
+name: AI review
+
+# `pull_request` (not `pull_request_target`) is deliberate: this workflow reads
+# an untrusted diff and sends it to an LLM, so it must never run with write
+# credentials in the context of a fork's code. The trade-off is that fork PRs
+# get no secrets and are skipped — see docs/ai-review.md.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  # A new push supersedes the review in flight; don't pay for both.
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The reviewer reads the development-workflow skill from the base
+          # branch's checkout, not from the PR head — a PR must not be able to
+          # rewrite the standard it is judged against.
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check for an API key
+        id: guard
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: |
+          if [ -z "${LLM_API_KEY}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No LLM_API_KEY secret configured (expected for fork PRs). Skipping AI review."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Review the pull request
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          # Which provider to call: anthropic | openai | gemini
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'anthropic' }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          # Required for openai and gemini; defaults to claude-opus-5 for anthropic.
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          # Point at a self-hosted or proxied endpoint; empty uses the provider's own.
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_MAX_TOKENS: ${{ vars.LLM_MAX_TOKENS }}
+          REVIEW_MAX_DIFF_BYTES: ${{ vars.REVIEW_MAX_DIFF_BYTES }}
+          REVIEW_MAX_COMMENTS: ${{ vars.REVIEW_MAX_COMMENTS }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python3 .github/scripts/ai_review.py

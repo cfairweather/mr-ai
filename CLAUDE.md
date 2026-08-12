@@ -32,7 +32,23 @@ without asking first. A red or partial ledger is never a merge.
 
 ## Toolchain
 
-This repository has no build toolchain yet. Until one exists the mechanical gates
-correctly report `N/A`, which is not the same as passing. When the first toolchain
-lands, record its real commands in
+Python 3.11, standard library only, driven by a `Makefile`:
+
+```bash
+make lint    # compileall, bash -n, workflow YAML parse
+make test    # python3 -m unittest discover -s tests
+make check   # both
+```
+
+The gate runner picks these up automatically. Format, types, build, and dependency
+audit have no tooling and correctly report `N/A` — record any new commands in
 [`references/stack-commands.md`](.claude/skills/development-workflow/references/stack-commands.md).
+
+## AI pull-request review
+
+Every PR is reviewed by an LLM via
+[`.github/workflows/ai-review.yml`](.github/workflows/ai-review.yml), which checks the
+change against the four gates *and* against whether it fits the repository at all.
+It is advisory: an AI approval does not replace a human one. Configuration,
+self-hosted endpoints, and the security model are in
+[`docs/ai-review.md`](docs/ai-review.md).

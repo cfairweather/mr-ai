@@ -6,10 +6,10 @@ is the record of what it tries and the place to look when a gate reports N/A.
 
 **Resolution order, first hit wins:** project config → this table → N/A with a reason.
 
-> This repository currently has no toolchain. Every mechanical gate resolves to N/A
-> until one is added. That is the correct result, not a passing one. When the first
-> toolchain lands, record its real commands in the [project section](#this-repository)
-> at the bottom so later tasks stop relying on guesses.
+> This repository's toolchain is Python (standard library only) driven by a
+> `Makefile`. See the [project section](#this-repository) at the bottom for the real
+> commands; gates with no tooling still resolve to N/A, which is correct rather than
+> passing.
 
 ## Node / TypeScript
 
@@ -79,13 +79,15 @@ CI wins — match it locally rather than arguing with it at merge time.
 
 ## This repository
 
-<!-- Add real commands here as the toolchain lands, and delete the note at the top. -->
+Python 3.11, standard library only — the AI reviewer runs on a GitHub Actions
+runner, where a `pip install` is a dependency and a supply-chain surface we do not
+need. The gate runner finds `make lint` / `make test` automatically.
 
 | Gate | Command | Notes |
 |---|---|---|
-| Format | — | not yet configured |
-| Lint | — | not yet configured |
-| Types | — | not yet configured |
-| Test | — | not yet configured |
-| Build | — | not yet configured |
-| Audit | — | not yet configured |
+| Format | — | N/A: no formatter adopted. Add `make fmt` when one is. |
+| Lint | `make lint` | `compileall`, `bash -n` on shell, YAML parse of workflows |
+| Types | — | N/A: no type checker adopted |
+| Test | `make test` | `python3 -m unittest discover -s tests` |
+| Build | — | N/A: nothing to build; scripts run from source |
+| Audit | — | N/A: no dependency manifest — stdlib only, nothing to audit |

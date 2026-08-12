@@ -108,10 +108,15 @@ has_stack() {
 
 echo "base:  ${BASE:-<none>}    changed files: $CHANGED_COUNT"
 echo "logs:  $LOG_DIR"
-if [ -z "${STACKS[*]:-}" ]; then
-  echo "stack: none detected — mechanical gates will report N/A"
+runner=""
+[ -f justfile ] && runner="justfile"
+[ -f Makefile ] && runner="${runner:+$runner+}Makefile"
+if [ -n "${STACKS[*]:-}" ]; then
+  echo "stack: ${STACKS[*]}${PM:+ (via $PM)}${runner:+ + $runner}"
+elif [ -n "$runner" ]; then
+  echo "stack: $runner targets only — gates without a target report N/A"
 else
-  echo "stack: ${STACKS[*]}${PM:+ (via $PM)}"
+  echo "stack: none detected — mechanical gates will report N/A"
 fi
 echo
 
