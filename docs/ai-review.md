@@ -20,6 +20,27 @@ Two things, weighted equally:
    it add a dependency or pattern the repo will regret. A change can pass every
    gate and still be the wrong change, and the reviewer is told to say so.
 
+## How a review flows
+
+```mermaid
+flowchart TB
+    PR["Pull request<br/><i>untrusted diff</i>"] --> WF["Workflow<br/><i>checkout base.sha</i>"]
+    SKILL["development-workflow skill<br/><i>from base branch</i>"] --> WF
+    WF --> KEY{"API key<br/>configured?"}
+    KEY -- no --> SKIP["Skip with notice<br/><i>fork PRs land here</i>"]
+    KEY -- yes --> ADAPT["Provider adapter<br/>anthropic / openai / gemini<br/><i>+ base-URL override</i>"]
+    ADAPT --> LLM(["LLM endpoint<br/><i>hosted or self-hosted</i>"])
+    LLM --> SAN["Validate + clamp<br/><i>schema, enums, caps,<br/>paths ∈ diff</i>"]
+    SAN --> GATE{"FAIL gate or<br/>blocking comment?"}
+    GATE -- yes --> RC["REQUEST_CHANGES"]
+    GATE -- no --> V["Model's verdict<br/>APPROVE / COMMENT"]
+    RC --> POST["Post PR review"]
+    V --> POST
+```
+
+The two arrows into `Validate + clamp` are the trust boundary: everything above
+it is influenced by the PR author, nothing below it is.
+
 ## Configuration
 
 Set the API key as a repository **secret**; everything else is a repository
