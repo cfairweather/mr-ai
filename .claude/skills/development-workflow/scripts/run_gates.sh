@@ -108,7 +108,7 @@ has_stack() {
 
 echo "base:  ${BASE:-<none>}    changed files: $CHANGED_COUNT"
 echo "logs:  $LOG_DIR"
-if [ ${#STACKS[@]} -eq 0 ]; then
+if [ -z "${STACKS[*]:-}" ]; then
   echo "stack: none detected — mechanical gates will report N/A"
 else
   echo "stack: ${STACKS[*]}${PM:+ (via $PM)}"
@@ -146,7 +146,7 @@ resolve_gate() {
     run_gate "$gate" "make $target"
     return
   fi
-  if [ -n "$PM" ] && have "$PM" && [ ${#scripts[@]} -gt 0 ]; then
+  if [ -n "$PM" ] && have "$PM" && [ -n "${scripts[*]:-}" ]; then
     local script
     for script in "${scripts[@]}"; do
       if npm_script "$script"; then
@@ -155,7 +155,7 @@ resolve_gate() {
       fi
     done
   fi
-  if [ ${#candidates[@]} -gt 0 ]; then
+  if [ -n "${candidates[*]:-}" ]; then
     gate_first "$gate" "${candidates[@]}"
   else
     add_row "$gate" "N/A" "no tool installed for this gate"

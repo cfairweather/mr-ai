@@ -104,6 +104,8 @@ regenerated. A binary export nobody can edit becomes wrong and unfixable.
 **Not required:** backend refactors, bug fixes with no visual or structural effect,
 dependency bumps, test-only changes, docs-only changes. Record N/A and the reason.
 
-**Placement.** `docs/images/`, referenced from the doc it supports, with alt text saying
-what the reader is meant to notice. Name files for content, not sequence:
-`auth-flow-after.png`, not `screenshot-3.png`.
+**Placement.** Captured images (screenshots, exported renders) go in `docs/images/`,
+referenced from the doc they support, with alt text saying what the reader is meant to
+notice. Name files for content, not sequence: `auth-flow-after.png`, not
+`screenshot-3.png`. A Mermaid diagram needs no file — fence it inline in the doc it
+explains, which is what "beside the doc" means for text-defined diagrams.

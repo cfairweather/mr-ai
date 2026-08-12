@@ -102,6 +102,17 @@ support, and carry alt text describing what the reader should see.
 
 This protocol is the part that actually protects the branch, so follow it literally.
 
+```mermaid
+flowchart LR
+    B[Build] --> G{"All four gates<br/>green in one run?"}
+    G -- yes --> M[Merge] --> N[Next task] --> B
+    G -- no --> F["Fix the cause<br/><i>never suppress</i>"]
+    F --> C{Third cycle?}
+    C -- no --> R["Re-run <b>all four</b>"] --> G
+    C -- yes --> S["Stop. Report.<br/>Do not merge."]
+```
+
+
 1. **Fix the cause.** Do not disable the check, raise a threshold, add a suppression or
    ignore comment, delete or skip the failing test, or reclassify the gate as N/A to get
    past it. Those all convert a visible failure into an invisible one, which is strictly
