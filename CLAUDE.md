@@ -24,8 +24,11 @@ Run the mechanical portion with:
 ```
 
 If a gate fails, fix the cause — never suppress the check — then **re-run the complete
-set**, because a fix invalidates every earlier result. Merge only on one uninterrupted
-green run, and print the evidence ledger with the merge decision.
+set**, because a fix invalidates every earlier result. Print the evidence ledger with
+the merge decision.
+
+One uninterrupted green run is the authorization to merge to `main`: merge on green
+without asking first. A red or partial ledger is never a merge.
 
 ## Toolchain
 

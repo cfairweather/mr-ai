@@ -152,8 +152,13 @@ Rules that keep the ledger honest:
 
 ## 6. Merge and continue
 
-Merge only on a fully green ledger. Then state what shipped, and carry the same loop
-into the next task — including the branch, including the gates.
+A fully green ledger is itself the authorization to merge into the default branch —
+merge without stopping to ask. That is the point of the gates: they front-load the
+scrutiny so shipping does not need a second approval on top of them. A red or partial
+ledger authorizes nothing, and no amount of urgency converts one into a merge.
+
+After merging, state what shipped, and carry the same loop into the next task —
+including the branch, including the gates.
 
 Open a pull request only if the user asks for one.
 
